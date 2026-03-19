@@ -37,6 +37,18 @@ NEWS_SOURCES = [
         "name": "The Guardian",
         "url":  "https://www.theguardian.com/football/tottenham-hotspur/rss",
     },
+    {
+        "name": "Sky Sports",
+        "url":  "https://www.skysports.com/rss/12040",
+    },
+    {
+        "name": "Football London",
+        "url":  "https://www.football.london/tottenham-hotspur-fc/?service=rss",
+    },
+    {
+        "name": "Spurs Official",
+        "url":  "https://www.tottenhamhotspur.com/rss/",
+    },
 ]
 
 

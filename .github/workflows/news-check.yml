@@ -1,0 +1,47 @@
+# .github/workflows/news-check.yml
+# ----------------------------------
+# Checks for new Spurs headlines every 30 minutes.
+# Only sends a Telegram message when there are stories not yet seen.
+# seen_news.json prevents duplicate alerts.
+
+name: News Check
+
+on:
+  schedule:
+    # Every 30 minutes, all day
+    - cron: "*/30 * * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  run:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+
+      - name: Run news check
+        env:
+          FOOTBALL_DATA_API_KEY: ${{ secrets.FOOTBALL_DATA_API_KEY }}
+          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+        run: python spurs_assistant.py news
+
+      - name: Save seen records
+        run: |
+          git config user.name  "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add -f seen_news.json 2>/dev/null || true
+          git diff --staged --quiet || git commit -m "chore: update seen news [skip ci]"
+          git push

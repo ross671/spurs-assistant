@@ -1,0 +1,62 @@
+# .github/workflows/daily-full.yml
+# ---------------------------------
+# Runs the full Spurs Assistant update every morning at 08:00 UTC.
+# This sends: last result + next fixture + any new headlines + lineup check.
+#
+# GitHub runs this on its own servers — your Mac does not need to be on.
+
+name: Daily Full Update
+
+on:
+  schedule:
+    # Cron format: minute hour day month weekday
+    # This means: at 08:00 UTC, every day
+    - cron: "0 8 * * *"
+
+  # "workflow_dispatch" lets you trigger this manually from the GitHub website
+  # (useful for testing without waiting for 08:00)
+  workflow_dispatch:
+
+# Give the workflow permission to push the seen-record files back to the repo
+permissions:
+  contents: write
+
+jobs:
+  run:
+    runs-on: ubuntu-latest  # GitHub provides a free Linux server for each run
+
+    steps:
+      # 1. Download the repo onto the GitHub server
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      # 2. Install Python
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      # 3. Install the packages listed in requirements.txt
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+
+      # 4. Run the script in "full" mode
+      #    The API keys come from GitHub Secrets (set up in repo Settings)
+      #    and are injected here as environment variables.
+      - name: Run full update
+        env:
+          FOOTBALL_DATA_API_KEY: ${{ secrets.FOOTBALL_DATA_API_KEY }}
+          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+        run: python spurs_assistant.py full
+
+      # 5. Commit seen_news.json / seen_lineups.json back to the repo
+      #    so the next run knows which articles/lineups were already sent.
+      #    [skip ci] in the message tells GitHub not to re-trigger this workflow.
+      - name: Save seen records
+        run: |
+          git config user.name  "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add -f seen_news.json seen_lineups.json 2>/dev/null || true
+          git diff --staged --quiet || git commit -m "chore: update seen records [skip ci]"
+          git push

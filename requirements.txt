@@ -1,0 +1,9 @@
+# requirements.txt
+# -----------------
+# These are the Python packages this project needs.
+# Install them all at once by running:
+#   pip install -r requirements.txt
+
+requests==2.32.3      # Makes HTTP calls to APIs (football-data.org and Telegram)
+python-dotenv==1.0.1  # Reads the .env file and loads keys into the environment
+feedparser==6.0.11    # Downloads and parses RSS news feeds (used by news.py)

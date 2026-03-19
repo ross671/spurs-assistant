@@ -1,0 +1,17 @@
+# .gitignore
+# ----------
+# Tells git which files to NEVER upload to GitHub.
+# This is critical — your API keys must stay private.
+
+# Your secret API keys — never commit this
+.env
+
+# Python bytecode cache — generated automatically, not needed in the repo
+__pycache__/
+*.pyc
+
+# Local cron log — machine-specific, not useful on GitHub
+cron.log
+
+# macOS folder metadata — created automatically by Finder
+.DS_Store
